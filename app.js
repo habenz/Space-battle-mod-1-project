@@ -16,11 +16,13 @@ class Spaceship {
 		if (attackingShip.hull <= 0){
 			throw "Zombie Ship! Ships without health cannot attack";
 		}
+
 		const attackRoll = Math.random(); // maybe rename this
 		if (attackingShip.accuracy > attackRoll) {
 			this.hull -= attackingShip.firepower;
 		}
 		// is it useful to return anything?
+		return attackingShip.accuracy > attackRoll;
 	}
 }
 // Alien Ship sub-class
@@ -33,8 +35,11 @@ class AlienShip extends Spaceship{
 	}
 }
 
-// setup function:
-	// player ship, list of alien ships 
+// setup Game:
+
+let playerShip;
+let activeAliens;
+
 function setUpGame(numAliens) {
 	// stats according to spec
 	playerShip = new Spaceship('USS Schwarzenegger', 20, 5,.7);
@@ -45,17 +50,49 @@ function setUpGame(numAliens) {
 	}
 }
 
-let playerShip;
-let activeAliens;
+function playRound(attackingShip, defendingShip){
+	defendingShip.receiveAttack(attackingShip);
+	console.log(`You attacked ${defendingShip.name}`);
+
+	if (defendingShip.hull > 0) {
+		attackingShip.receiveAttack(defendingShip);
+		console.log(`${defendingShip.name} attacked you back!`);
+	}
+}
+
+function displayHealth() {
+
+}
+
+// Main game play
+function playGame(){
+	while (activeAliens.length > 0) {
+		const currBattlingAlien = activeAliens.pop();
+		while (currBattlingAlien.hull > 0 && playerShip.hull > 0) {
+			playRound(playerShip,currBattlingAlien);
+			displayHealth();
+		}
+
+		if (playerShip.hull <= 0) {
+			console.log("GAME LOST");
+			return false;
+		} else { // alien ship must have been destroyed
+			console.log(`${currBattlingAlien.name} has been destroyed!`);
+			let keepGoing = confirm(`Your hull is at ${playerShip.hull} health. Keep going?`);
+			if (!keepGoing){
+				console.log('You ran!');
+				return false;
+			}
+		}
+	}
+
+	console.log("GAME WON!")
+	console.log(playerShip);
+	return true;
+}
 
 // testing code
-setUpGame(6)
-
-console.log(playerShip);
-console.log(activeAliens[0]);
-
-activeAliens[0].receiveAttack(playerShip);
-playerShip.receiveAttack(activeAliens[0]);
-
-console.log(playerShip);
-console.log(activeAliens[0]);
+setUpGame(6);
+if (confirm("Ready to fight for the fate of Earth?")){
+	playGame();
+}
