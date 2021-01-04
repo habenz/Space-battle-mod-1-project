@@ -11,18 +11,17 @@ class Spaceship {
 		this.accuracy = accuracy;
 	}
 
-	receiveAttack(attackingShip) {
-		// maybe it's not appropriate to throw for this
-		if (attackingShip.hull <= 0){
+	attack(targetShip) {
+		if(this.hull <= 0) {
 			throw "Zombie Ship! Ships without health cannot attack";
 		}
-
 		const attackRoll = Math.random(); // maybe rename this
-		if (attackingShip.accuracy > attackRoll) {
-			this.hull -= attackingShip.firepower;
+		if (this.accuracy > attackRoll) {
+			targetShip.hull -= this.firepower;
 		}
-		// is it useful to return anything?
-		return attackingShip.accuracy > attackRoll;
+		// return attack success
+		return this.accuracy > attackRoll;
+
 	}
 }
 // Alien Ship sub-class
@@ -51,17 +50,13 @@ function setUpGame(numAliens) {
 }
 
 function playRound(attackingShip, defendingShip){
-	defendingShip.receiveAttack(attackingShip);
+	attackingShip.attack(defendingShip);
 	console.log(`You attacked ${defendingShip.name}`);
 
 	if (defendingShip.hull > 0) {
-		attackingShip.receiveAttack(defendingShip);
+		defendingShip.attack(attackingShip);
 		console.log(`${defendingShip.name} attacked you back!`);
 	}
-}
-
-function displayHealth() {
-
 }
 
 // Main game play
@@ -70,7 +65,7 @@ function playGame(){
 		const currBattlingAlien = activeAliens.pop();
 		while (currBattlingAlien.hull > 0 && playerShip.hull > 0) {
 			playRound(playerShip,currBattlingAlien);
-			displayHealth();
+			displayHealth(playerShip, currBattlingAlien);
 		}
 
 		if (playerShip.hull <= 0) {
@@ -91,8 +86,33 @@ function playGame(){
 	return true;
 }
 
-// testing code
-setUpGame(6);
-if (confirm("Ready to fight for the fate of Earth?")){
-	playGame();
+//------------------------------------------------------------------------------------
+function displayHealth(player, alien) {
+	let healthStatus;
+	if (player.hull > 10) {
+		healthStatus = "green";
+	} else if (player.hull > 5) {
+		healthStatus = "orange";
+	} else {
+		healthStatus = "red";
+	}
+
+	let healthStr = `%c Player hull: %c ${player.hull} %c Alien hull: %c ${alien.hull}`;
+	let healthStyles = ["font-style: italic; color:brown" , // "Player hull"
+						`color: ${healthStatus}`, // player hull value
+						"font-style: italic; color:brown", // "Alien hull"
+						"color: grey"] // alien hull value
+	console.log(healthStr, ...healthStyles);
 }
+//------------------------------------------------------------------------------------
+
+// Running the game after the user indicates readiness
+window.addEventListener('load', (e) => {
+	document.getElementById('start-button').addEventListener('click', (btnClick) =>{
+		if (confirm("Ready to fight for the fate of Earth?")){
+			setUpGame(6);
+			playGame();
+		}
+	});
+
+});
