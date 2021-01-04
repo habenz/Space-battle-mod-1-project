@@ -1,0 +1,15 @@
+body {
+	background-image: url("https://i.pinimg.com/originals/5c/5f/83/5c5f8321f9a15956fbb02077e2ea39fc.jpg");
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+h1,h2 {
+	color: white;
+}
+
+#start-button {
+	width: fit-content;
+}
